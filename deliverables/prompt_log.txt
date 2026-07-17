@@ -1,0 +1,32 @@
+PROMPT LOG - CVM Simulation Case
+Liberty Latin America (CellMov) - Offer Recommendation Case
+==================================================================
+
+This log documents the prompts used with AI (Claude Code) to collaboratively
+complete the "CVM Simulation - Case.ipynb" notebook, per the case requirements.
+
+Format per entry:
+------------------
+[Date] [Notebook section / cell]
+Prompt: <user prompt>
+Outcome: <brief summary of what was produced/decided>
+------------------
+
+==================================================================
+
+[2026-07-17] [Descriptive Analytics - lead_base profiling]
+Prompt: "Role: You are an expert Data Scientist and Analytics Lead. Task:
+Provide the complete, ready-to-run Python code directly in your response to
+perform univariate and multivariate descriptive analytics using matplotlib
+(and seaborn)... Output only the code block with comments." (full spec:
+demographics distribution, age histogram+KDE, total usage boxplot/histogram,
+OTT usage vs socio-economic segment/mobility profile, mobility vs data usage,
+correlation heatmap).
+Outcome: Returned the descriptive-analytics code directly in the chat
+response (not written to the notebook, per the request), operating on
+`lead_base` as given. Univariate section: segment/mobility count plots, age
+histogram+KDE, total usage histogram+boxplot. Multivariate section: OTT usage
+by segment/mobility via a reusable `boxplot_by_category` helper, mean usage by
+mobility profile bar chart, coolwarm correlation heatmap over age +
+consumption variables. Equivalent to the code already validated and placed in
+notebook cell 79b75442 earlier in this session.
