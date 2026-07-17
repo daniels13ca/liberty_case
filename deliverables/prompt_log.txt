@@ -30,3 +30,79 @@ by segment/mobility via a reusable `boxplot_by_category` helper, mean usage by
 mobility profile bar chart, coolwarm correlation heatmap over age +
 consumption variables. Equivalent to the code already validated and placed in
 notebook cell 79b75442 earlier in this session.
+------------------
+
+[2026-07-17] [Comparative Analytics & Price Elasticity - random_results vs low_cost_results]
+Prompt: "Task: Write the Python code to perform descriptive analytics and
+price elasticity modeling based on two experimental datasets: random_results
+and low_cost_results... Fit a logistic regression model... dependent variable
+converted, independent variables total_price and the main product combination
+flags (to isolate the effect of price change from the product mix
+effect)... Extract and plot the estimated demand/probability curve across
+different total_price tiers... Output format: three distinct sections
+(Comparative Descriptive Analytics, Price Elasticity Modeling, Experiment
+Insights)."
+Outcome: Delivered a three-section code block in chat (not written to the
+notebook). Before finalizing, empirically tested the requested joint model
+(total_price + all 8 offer flags) and found it perfectly multicollinear —
+total_price is a deterministic linear function of the flags (fixed
+per-component pricing) — the model "converged" but produced standard errors
+in the millions. Fixed by dropping two flags (offer_low_speed_internet,
+offer_wall_to_wall_wifi) as reference categories to restore a full-rank
+design matrix, then fit Logit(converted ~ total_price + 6 flags), plotted the
+model's predicted demand curve holding product mix at its average
+composition, and printed an interpretation of the price coefficient and the
+random-to-low-cost conversion shift. Also added bundle-level
+(offer_description) and individual-component conversion-rate breakdowns.
+------------------
+
+[2026-07-17] [Bug fix - duplicate offer_description column]
+Prompt: pasted a ValueError traceback — "Grouper for 'offer_description' not
+1-dimensional" — raised when calling bundle_performance() on random_results.
+Outcome: Diagnosed the root cause: sim() returns two identical
+offer_description columns, so groupby("offer_description") resolves to a 2D
+slice instead of a 1D Series. Verified empirically that both duplicate
+columns hold identical values, then provided a fix
+(`df.loc[:, ~df.columns.duplicated()]`) to drop the duplicate before any
+groupby call in Section 1.
+------------------
+
+[2026-07-17] [Percentage formatting for the demand curve]
+Prompt: "please modify the code to get the conversion probability in
+percentaje"
+Outcome: Updated the demand-curve plot to display the y-axis as a percentage
+via matplotlib.ticker.PercentFormatter(xmax=1, decimals=1), while keeping the
+underlying predicted_conversion_rate column as a raw 0-1 probability
+(avoids double-scaling bugs if the values are reused downstream).
+------------------
+
+[2026-07-17] [Contextual Bandit implementation - core recommender]
+Prompt: "Task: Write the complete Python code to implement a Contextual
+Bandit policy to optimize cross-selling offers for each customer, adhering
+strictly to the constraints of our stochastic simulation environment...
+Feature Engineering... Action Space Definition... Policy Implementation
+(LinUCB, Thompson Sampling, or Cost-Sensitive Classification/Logistic
+Regression with epsilon-greedy exploration)... Sequential Batch Training
+(batches 1-10): predict/select offer, apply exploration, run sim(), update
+policy weights... Testing & Evaluation... Output format: Feature Engineering,
+Action Space & Constraint Mapping, Sequential Training Loop, Final Test
+Evaluation." (full detailed spec with hard constraints on Internet/TV
+mutual exclusivity)
+Outcome: Delivered the full contextual bandit implementation as a single
+code block: a shared Logistic Regression model (one-hot categoricals +
+scaled numerics + offer flags) predicting P(convert | context, action); a
+96-action space built structurally from mandatory/exclusive Internet,
+optional/exclusive TV, and 4 independent add-ons (hard constraints satisfied
+by construction, with defensive assertions rather than post-hoc filtering);
+decision rule = argmax(P(convert) * known component margin from the case's
+pricing table — margin is not modeled from sim(), since it is deterministic
+business data); epsilon-greedy exploration decaying from 1.0 to 0.05 across
+the 10 batches; cumulative retraining after each batch (simpler to explain
+live than online/SGD updates); and a `your_optimized_function()` matching the
+signature required by the notebook's final validation gate. Validated the
+mechanics on a reduced-scale run (3 batches x 1,500 leads) before delivering,
+confirming a real learning curve (conversion rose 0.33% -> 1.27% -> 1.93% as
+epsilon decayed), and timed the action-scoring step at full batch scale
+(~10.5s per 50k-lead x 96-action batch) to confirm the full 10-batch run is
+feasible in a few minutes.
+------------------
